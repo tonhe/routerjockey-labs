@@ -1,0 +1,28 @@
+---
+- name: Push baseline ACL policy to edge firewalls
+  hosts: firewalls
+  gather_facts: false
+  connection: network_cli
+
+  vars:
+    allowed_management_cidrs:
+      - "10.10.0.0/24"
+      - "10.20.0.0/24"
+
+  tasks:
+    - name: Apply management-plane allow list
+      cisco.asa.asa_acls:
+        config:
+          - name: mgmt-in
+            aces:
+              - sequence: 10
+                grant: permit
+                source:
+                  any: true
+                destination:
+                  address: "{{ item }}"
+                protocol_options:
+                  tcp:
+                    eq: ssh
+        state: replaced
+      loop: "{{ allowed_management_cidrs }}"

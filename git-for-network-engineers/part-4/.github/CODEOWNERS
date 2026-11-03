@@ -1,0 +1,8 @@
+# Default reviewer for everything
+* @tonhe
+
+# Firewall playbooks need a second pair of eyes
+playbooks/firewall*.yml @tonhe @network-team
+
+# CI changes need ops review
+.github/workflows/ @tonhe

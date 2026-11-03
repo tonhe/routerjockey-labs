@@ -8,6 +8,9 @@ The labs run under [netlab](https://netlab.tools/) with containerlab. Vendor ima
 
 | Series | Folder |
 |---|---|
+| [Docker Compose for Your Home Lab](https://routerjockey.com/series/docker-compose-for-your-home-lab/) | [`docker-compose-for-your-home-lab/`](docker-compose-for-your-home-lab/) |
+| [Git for Network Engineers](https://routerjockey.com/series/git-for-network-engineers/) | [`git-for-network-engineers/`](git-for-network-engineers/) |
+| [Labs as Code](https://routerjockey.com/series/labs-as-code/) | [`labs-as-code/`](labs-as-code/) |
 
 New series land here as they publish.
 

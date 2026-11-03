@@ -1,0 +1,17 @@
+# Ansible
+*.retry
+backups/
+
+# Vault password files (never commit these)
+*.vault_pass
+vault_password.txt
+.vault_pass*
+
+# Python virtualenvs and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Editor and OS noise
+*.swp
+.DS_Store

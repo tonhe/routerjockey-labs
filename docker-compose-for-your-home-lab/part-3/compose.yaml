@@ -1,0 +1,27 @@
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    hostname: pihole
+    networks:
+      lan:
+        ipv4_address: 192.168.1.53
+    environment:
+      TZ: "America/Chicago"
+      FTLCONF_webserver_api_password: "changeme"
+      FTLCONF_dns_listeningMode: "all"
+      FTLCONF_dns_upstreams: "1.1.1.1;9.9.9.9"
+    volumes:
+      - ./etc-pihole:/etc/pihole
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    healthcheck:
+      test: ["CMD", "dig", "+short", "+norecurse", "+retry=0", "@127.0.0.1", "pi.hole"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  lan:
+    external: true

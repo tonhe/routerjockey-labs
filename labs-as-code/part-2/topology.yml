@@ -1,0 +1,128 @@
+#
+# netlab topology: OSPF ring + area-1 segment, BGP default-route only
+# ----------------------------------------------------------------------
+# Backbone ring  (OSPF area 0):
+#     DC1 - BRANCH1 - DC2 - DC3 - BRANCH2 - (back to) DC1
+#
+# Segment        (OSPF area 1, behind two ABRs = DC3 and DC2):
+#     DC3 - SEG1 - SEG2 - SEG3 - DC2          (OSPF only -- NO BGP on these links)
+#
+# BGP carries ONE prefix: 0.0.0.0/0, originated by DC1, DC2, DC3.
+# BRANCH1/BRANCH2 receive it over directly-connected ring eBGP.
+# SEG1/SEG2/SEG3 run eBGP multihop (loopback-to-loopback) to all three DCs
+# and pick their exit with local-preference (SEG1->DC3, SEG2->DC2, SEG3->DC2).
+# BFD everywhere.
+# ----------------------------------------------------------------------
+
+name: ospf-ring-bgp
+
+provider: clab
+defaults.device: eos
+
+plugin: [ bgp.policy, bgp.session, ebgp.multihop ]
+
+module: [ ospf, bgp, bfd ]
+
+bgp.as: 65000
+bgp.advertise_loopback: False
+bgp.bfd: True
+
+ospf.area: 0
+ospf.bfd: True
+
+
+nodes:
+  dc1:
+    bgp.as: 65001
+    loopback.ipv4: 10.10.0.1/16
+    bgp.originate: [ 0.0.0.0/0 ]
+  branch1:
+    bgp.as: 65002
+    loopback.ipv4: 10.20.0.1/16
+  dc2:
+    bgp.as: 65003
+    loopback.ipv4: 10.30.0.1/16
+    bgp.originate: [ 0.0.0.0/0 ]
+  dc3:
+    bgp.as: 65004
+    loopback.ipv4: 10.40.0.1/16
+    bgp.originate: [ 0.0.0.0/0 ]
+  branch2:
+    bgp.as: 65005
+    loopback.ipv4: 10.50.0.1/16
+
+  seg1:
+    bgp.as: 65101
+    ospf.area: 1
+    loopback.ipv4: 10.101.0.1/16
+  seg2:
+    bgp.as: 65102
+    ospf.area: 1
+    loopback.ipv4: 10.102.0.1/16
+  seg3:
+    bgp.as: 65103
+    ospf.area: 1
+    loopback.ipv4: 10.103.0.1/16
+
+bgp.multihop.sessions:
+- seg1:
+  dc1:
+- seg1:
+    bgp.locpref: 200
+  dc3:
+- seg1:
+  dc2:
+- seg2:
+  dc1:
+- seg2:
+  dc3:
+- seg2:
+    bgp.locpref: 200
+  dc2:
+- seg3:
+  dc1:
+- seg3:
+  dc3:
+- seg3:
+    bgp.locpref: 200
+  dc2:
+
+links:
+  - dc1:
+    branch1:
+      bgp.locpref: 200
+    role: internal
+  - branch1:
+    dc2:
+    role: internal
+  - dc2:
+    dc3:
+    role: internal
+  - dc3:
+    branch2:
+      bgp.locpref: 200
+    role: internal
+  - branch2:
+    dc1:
+    role: internal
+
+  - dc3:
+    seg1:
+    role: internal
+    ospf.area: 1
+    bgp: False
+  - seg1:
+    seg2:
+    role: internal
+    ospf.area: 1
+    bgp: False
+  - seg2:
+    seg3:
+    role: internal
+    ospf.area: 1
+    bgp: False
+  - seg3:
+    dc2:
+    role: internal
+    ospf.area: 1
+    bgp: False
